@@ -1,30 +1,27 @@
-﻿using AxGrid.FSM;
-using AxGrid.Model;
-
-using UnityEngine;
-
-[State("Idle")]
-internal class IdleState : FSMState
+﻿namespace AxGame.States
 {
-		[Enter]
-		protected void Enter()
-		{
-				Model.EventManager.AddAction("OnRollStartClick", GoToRollState);
-				Model.Set("BtnRollStartEnable", true);
-				Model.Set("BtnRollStopEnable", false);
-				
-		}
+		using AxGrid.FSM;
+		using AxGrid.Model;
 
-		[Exit]
-		protected void Exit()
+		[State("Idle")]
+		internal class IdleState : FSMState
 		{
-				
-		}
+				[Enter]
+				protected void Enter()
+				{
+						Model.Set("BtnRollStartEnable", true);
+						Model.Set("BtnRollStopEnable", false);
+				}
 
-		public void GoToRollState()
-		{
-				Debug.Log("Roll");
-				Parent.Change("Roll");
-
+				[Bind]
+				public void OnBtn(string name)
+				{
+						switch (name)
+						{
+								case "RollStart":
+										Parent.Change("Roll");
+										break;
+						}
+				}
 		}
 }

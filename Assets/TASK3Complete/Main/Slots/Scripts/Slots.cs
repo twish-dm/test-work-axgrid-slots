@@ -1,45 +1,76 @@
-using AxGrid;
-using AxGrid.Base;
-using AxGrid.FSM;
-using AxGrid.Model;
-using AxGrid.Path;
-using AxGrid.Utils;
-
-using System.Linq;
-using UnityEngine;
-
-public class Slots : MonoBehaviourExtBind
+namespace AxGame.Components
 {
-		[SerializeField] private ParticleSystem m_StopEffect;
-		private ListRenderer[] m_Lists;
-		[OnAwake]
-		private void Init()
-		{
-				m_Lists = GetComponentsInChildren<ListRenderer>();
-		}
+		using AxGrid.Base;
+		using AxGame.Components.Lists;
+		using AxGrid.Model;
 
-		[Bind]
-		private void StartRoll()
+		using System.Collections;
+
+		using UnityEngine;
+
+		public class Slots : MonoBehaviourExtBind
 		{
-				Path = new CPath().EasingLinear(3f, 0, 1f, (value) =>
+				public enum SlotsState { Rolling, Stopped }
+
+				[SerializeField] private ParticleSystem m_StopEffect;
+				private ListRenderer[] m_Lists;
+				private IEnumerator m_RollCoroutine;
+
+				[OnAwake]
+				private void Init()
+				{
+						m_Lists = GetComponentsInChildren<ListRenderer>();
+				}
+
+				private IEnumerator StartRollCoroutine(ListRenderer[] listRenderers, float time, float speed, float delay)
 				{
 						for (int i = 0; i < m_Lists.Length; i++)
 						{
-								m_Lists[i].Speed = Mathf.Pow(value, i + 1) * 10;
+								m_Lists[i].StartRoll(time - delay, speed, delay / m_Lists.Length * i);
 						}
-				});
-		}
 
-		[Bind]
-		private void StopRoll()
-		{
-				Path = CPath.Create().EasingLinear(3, m_Lists.Length, 0, (value) =>
+						for (int i = 0; i < m_Lists.Length; i++)
+						{
+								yield return new WaitUntil(() => m_Lists[i].CurrentState == ListRenderer.State.RollStartComplete);
+						}
+						m_RollCoroutine = null;
+				}
+				private IEnumerator StopRollCoroutine(ListRenderer[] listRenderers, float time, float delay)
 				{
-						m_Lists[Mathf.FloorToInt(value% m_Lists.Length)].Speed = value % 1 * 10;
-						
-				}).Action(()=>
+						for (int i = 0; i < m_Lists.Length; i++)
+						{
+								m_Lists[i].StopRoll(time - delay, delay / m_Lists.Length * i);
+						}
+
+						for (int i = 0; i < m_Lists.Length; i++)
+						{
+								yield return new WaitUntil(() => m_Lists[i].CurrentState == ListRenderer.State.RollStopComplete);
+						}
+						m_RollCoroutine = null;
+						RollComplete();
+				}
+
+				private void RollComplete()
 				{
 						m_StopEffect.Play();
-				});
+				}
+
+				[Bind]
+				private void StartRoll(float time, float speed, float delay)
+				{
+						if (m_RollCoroutine != null)
+								StopCoroutine(m_RollCoroutine);
+						m_RollCoroutine = StartRollCoroutine(m_Lists, time, speed, delay);
+						StartCoroutine(m_RollCoroutine);
+				}
+
+				[Bind]
+				private void StopRoll(float time, float delay)
+				{
+						if (m_RollCoroutine != null)
+								StopCoroutine(m_RollCoroutine);
+						m_RollCoroutine = StopRollCoroutine(m_Lists, time, delay);
+						StartCoroutine(m_RollCoroutine);
+				}
 		}
 }

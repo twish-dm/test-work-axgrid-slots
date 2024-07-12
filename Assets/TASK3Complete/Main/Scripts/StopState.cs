@@ -1,18 +1,26 @@
-﻿using AxGrid.FSM;
-
-[State("Stop")]
-internal class StopState : FSMState
+﻿namespace AxGame.States
 {
-		[Enter]
-		protected void Enter()
-		{
-				Model.Set("BtnRollStopEnable", false);
-				Model.EventManager.Invoke("StopRoll");
-		}
+		using AxGrid.FSM;
 
-		[One(3)]
-		protected void GoToIdleState()
+		[State("Stop")]
+		internal class StopState : FSMState
 		{
-				Parent.Change("Idle");
+				[Enter]
+				protected void Enter()
+				{
+						Model.Set("BtnRollStopEnable", false);
+						Model.EventManager.Invoke("StopRoll", 3f, 1.5f);
+
+				}
+				[Exit]
+				private void Exit()
+				{
+						Model.EventManager.RemoveAction(GoToIdleState);
+				}
+				[One(3)]
+				protected void GoToIdleState()
+				{
+						Parent.Change("Idle");
+				}
 		}
 }

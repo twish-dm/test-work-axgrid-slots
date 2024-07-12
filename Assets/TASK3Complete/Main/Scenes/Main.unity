@@ -901,7 +901,7 @@ MonoBehaviour:
   globalModel: 0
   buttonName: 
   enableField: 
-  defaultEnable: 1
+  defaultEnable: 0
   keyField: 
   key: 
   onKeyPress: 0
@@ -1443,7 +1443,7 @@ MonoBehaviour:
   globalModel: 0
   buttonName: 
   enableField: 
-  defaultEnable: 1
+  defaultEnable: 0
   keyField: 
   key: 
   onKeyPress: 0
