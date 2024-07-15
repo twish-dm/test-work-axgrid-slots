@@ -18,7 +18,7 @@ namespace AxGame
 						Settings.Fsm.Add(new StopState());
 						Settings.Fsm.Start("Idle");
 				}
-
+				
 				[OnUpdate]
 				private void UpdateThis()
 				{
