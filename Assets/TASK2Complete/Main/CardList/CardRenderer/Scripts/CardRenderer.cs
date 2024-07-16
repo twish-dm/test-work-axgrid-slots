@@ -36,6 +36,7 @@ namespace Task3.Cards
 
 				public void MoveTo(Vector2 target)
 				{
+						
 						Path = CPath.Create()
 						.EasingLinear(1f, 0, 1, (x) => rectTransform.anchoredPosition = Vector2.Lerp(rectTransform.anchoredPosition, target, x));
 				}
